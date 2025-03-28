@@ -1,0 +1,37 @@
+type s_tree = NodeS of (t_tree * s_tree) | Term of term
+and t_tree = NodeT of term *s_tree * term
+and term = A|B|C
+exception Syntax_error
+let charlist_of_string str =
+  let n =String.length str in
+  let rec build i  =
+    if i = n then []
+    else
+      str.[i]::build (i+1)
+  in
+  build 0
+
+
+let rec parseS l =
+  match l with
+  | 'a':: q -> let t,l'= parseT l in 
+               let s, l'' = parseS l' in
+               NodeS(t,s), l''
+  | 'c':: q -> Term C,q
+  | _ -> raise Syntax_error
+
+and parseT l = 
+  match l with
+  | 'a' :: q -> let s,l'= parseS q in
+                begin
+                  match l' with
+                    | 'b':: q -> NodeT (A,s,B),q
+                    | _ -> raise Syntax_error
+                end
+  | _ -> raise Syntax_error
+
+
+let analyze l=
+ let (ast,q) = parseS l in
+ if q <> [] then raise Syntax_error
+ else ast

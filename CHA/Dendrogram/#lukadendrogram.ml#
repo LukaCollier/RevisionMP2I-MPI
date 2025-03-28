@@ -1,0 +1,6 @@
+type tree = Leaf of string | Node of float * tree * tree
+let db : (string, string list) Hashtbl.t = Hashtbl.create 101
+
+
+let rec filtre_last l =
+  match l with
