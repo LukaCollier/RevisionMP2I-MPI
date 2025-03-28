@@ -1,0 +1,29 @@
+type 'a mot = 'a list
+type ('a,'b) symbole = T of 'a | V of 'b
+type ('a,'b) grammaire = { init : 'b; regles : ('b, ('a,'b) symbole list list) Hashtbl.t;}
+
+let mem (u:'a list) (g: ('a,'b) grammaire) : bool =
+  let rec backtrack (u: 'a list ) (v: ('a , 'b) symbole list) : bool =
+    match u,v with
+    |[],[] -> true
+    | _, [] -> false
+    | [], T _ :: _ -> false
+    | u1 :: u', T v1 :: v' -> u1= v1 && backtrack u' v'
+    | u, V v1 :: v' ->
+       let beta = Hashtbl.find g.regles v1 in
+       let apprec beta_i =
+         backtrack u (beta_i @ v') in
+       List.exists apprec beta
+  in
+  backtrack u [V g.init]
+
+
+let g_ex =(*provoque une boucle inf*)
+  let r = Hashtbl.create 1 in
+  Hashtbl.add r 0 [[ V  ; T 'a'];[] ];
+  {init = 0 ; regles = r}
+
+let g_ex1 =(*ne provoque pas une boucle inf*)
+  let r = Hashtbl.create 1 in
+  Hashtbl.add r 0 [[ T 'a'; V 0];[] ];
+  {init = 0 ; regles = r}
